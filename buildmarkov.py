@@ -1,9 +1,11 @@
 import pickle
 import time,sys
+
 def build_dict(topic):
     input_path = topic+'.txt'
     tweets = open(input_path,'r')
     markov = {'\n':[]}
+    blacklist = open("blacklist.txt",'r')
     
     for tweet in tweets:
         tweet = [word.lower() for word in tweet.split()]
@@ -14,22 +16,25 @@ def build_dict(topic):
                 tweet.remove(word)
             if word[0] == '@':
                 tweet.remove(word)
+            if word in blacklist:
+                tweet.remove(word)
 
         #don't process empty tweets
         if len(tweet)==0:
             continue
 
         for i in range(len(tweet)):
-            if i == 0:
-                markov['\n'].append(tweet[0])
+            if i == 0: #word is the first in the tweet
+                markov['\n'].append(tweet[0]) #\n used as placeholder for start
             
-            if tweet[i] not in markov:
+            if tweet[i] not in markov: #first use of word, add to keys
                 markov[tweet[i]] = []
-            try:
-                markov[tweet[i]].append(tweet[i+1])
-                
-            except IndexError:
-                markov[tweet[i]].append('\n')
+
+
+            try: #add word to list
+                markov[tweet[i]].append(tweet[i+1])              
+            except IndexError: #word at end of tweet
+                markov[tweet[i]].append('\n')#mark this word as ending the tweet
     return markov
                 
 
